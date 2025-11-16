@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación Técnica - Compilador</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #2563eb;
+            --secondary: #7c3aed;
+            --accent: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            color: var(--dark);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 3rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            color: var(--dark);
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .tech-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .tech-card h2 {
+            color: var(--dark);
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 0.8rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .component {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .component h3 {
+            color: var(--dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .method-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+        
+        .method-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+        
+        .method-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .method-list strong {
+            color: var(--primary);
+            min-width: 120px;
+            display: inline-block;
+        }
+        
+        .code-container {
+            background: #1e293b;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .code-header {
+            background: #334155;
+            padding: 1rem;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .code-example {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            overflow-x: auto;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+        
+        .class-diagram {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            font-family: 'Consolas', monospace;
+        }
+        
+        .flow-chart {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border: 2px dashed var(--primary);
+        }
+        
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: rgba(37, 99, 235, 0.1);
+            border-radius: 5px;
+        }
+        
+        .flow-number {
+            background: var(--primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Documentación Técnica del Compilador</h1>
+            <p style="color: var(--gray); font-size: 1.2rem;">Arquitectura interna, componentes y funcionamiento detallado</p>
+        </div>
+
+        <!-- ARQUITECTURA GENERAL -->
+        <div class="tech-card">
+            <h2>🏗️ Arquitectura del Compilador</h2>
+            
+            <div class="flow-chart">
+                <h3>Flujo de Compilación</h3>
+                <div class="flow-step">
+                    <div class="flow-number">1</div>
+                    <div><strong>ENTRADA:</strong> Código fuente → Analizador Léxico</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-number">2</div>
+                    <div><strong>Análisis Léxico:</strong> Genera tokens → Analizador Sintáctico</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-number">3</div>
+                    <div><strong>Análisis Sintáctico:</strong> Construye AST → Tabla de Símbolos</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-number">4</div>
+                    <div><strong>Análisis Semántico:</strong> Verifica tipos → Generador Código Intermedio</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-number">5</div>
+                    <div><strong>Generación:</strong> Código 3 direcciones → Traductor</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-number">6</div>
+                    <div><strong>SALIDA:</strong> Código traducido (Python/JS/Java)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tech-grid">
+            <!-- ANALIZADOR LÉXICO -->
+            <div class="tech-card">
+                <h2>🔤 Analizador Léxico (Lexer)</h2>
+                <p><strong>Función:</strong> Convierte el código fuente en tokens identificables</p>
+                
+                <div class="component">
+                    <h3>📝 Clase: AnalizadorLexico</h3>
+                    <ul class="method-list">
+                        <li><strong>__init__(codigo):</strong> Inicializa con el código fuente</li>
+                        <li><strong>analizar():</strong> Procesa todo el código y retorna lista de tokens</li>
+                        <li><strong>leer_palabra():</strong> Extrae identificadores y palabras clave</li>
+                        <li><strong>leer_numero():</strong> Extrae números enteros y flotantes</li>
+                        <li><strong>leer_string():</strong> Extrae cadenas entre comillas</li>
+                    </ul>
+                </div>
+
+                <div class="component">
+                    <h3>🎯 Tipos de Tokens Generados</h3>
+                    <ul class="method-list">
+                        <li><strong>KEYWORD:</strong> int, float, if, while, for, return</li>
+                        <li><strong>IDENTIFIER:</strong> Nombres de variables/funciones</li>
+                        <li><strong>INTEGER/FLOAT:</strong> Números 123, 45.67</li>
+                        <li><strong>STRING:</strong> "texto entre comillas"</li>
+                        <li><strong>OPERATOR:</strong> +, -, *, /, =, ==, !=, <, ></li>
+                        <li><strong>DELIMITER:</strong> ; , ( ) { } [ ]</li>
+                        <li><strong>ERROR:</strong> Caracteres no reconocidos</li>
+                    </ul>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">Ejemplo: Entrada → Tokens</div>
+                    <div class="code-example">
+// Código de entrada:
+int x = 10 + 20;
+
+// Tokens generados:
+KEYWORD: int (línea 1)
+IDENTIFIER: x (línea 1)
+OPERATOR: = (línea 1)
+INTEGER: 10 (línea 1)
+OPERATOR: + (línea 1)
+INTEGER: 20 (línea 1)
+DELIMITER: ; (línea 1)
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABLA DE SÍMBOLOS -->
+            <div class="tech-card">
+                <h2>📚 Tabla de Símbolos</h2>
+                <p><strong>Función:</strong> Almacena información sobre variables y funciones</p>
+                
+                <div class="component">
+                    <h3>📦 Clase: Symbol</h3>
+                    <ul class="method-list">
+                        <li><strong>nombre:</strong> Identificador de la variable/función</li>
+                        <li><strong>tipo:</strong> int, float, string, bool, void</li>
+                        <li><strong>scope:</strong> global, local (ámbito)</li>
+                        <li><strong>linea:</strong> Línea donde fue declarada</li>
+                        <li><strong>valor:</strong> Valor asignado (opcional)</li>
+                    </ul>
+                </div>
+
+                <div class="component">
+                    <h3>🛠️ Clase: TablaSimbolos</h3>
+                    <ul class="method-list">
+                        <li><strong>construir(tokens):</strong> Analiza tokens y construye tabla</li>
+                        <li><strong>buscar(nombre):</strong> Encuentra símbolo por nombre</li>
+                        <li><strong>simbolos:</strong> Lista de todos los símbolos</li>
+                        <li><strong>declarados:</strong> Set de nombres ya declarados</li>
+                    </ul>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">Ejemplo: Tabla Generada</div>
+                    <div class="code-example">
+Nombre    Tipo    Ámbito    Línea
+---------------------------------
+x         int     global    1
+y         float   global    2
+main      function(int) global 1
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANALIZADOR SINTÁCTICO -->
+            <div class="tech-card">
+                <h2>🌳 Analizador Sintáctico (Parser)</h2>
+                <p><strong>Función:</strong> Verifica estructura gramatical y construye AST</p>
+                
+                <div class="component">
+                    <h3>🛠️ Clase: AnalizadorSintactico</h3>
+                    <ul class="method-list">
+                        <li><strong>analizar():</strong> Procesa tokens y genera árbol sintáctico</li>
+                        <li><strong>analizar_declaracion():</strong> Procesa declaraciones de variables</li>
+                        <li><strong>analizar_if():</strong> Procesa estructuras if-else</li>
+                        <li><strong>analizar_while():</strong> Procesa bucles while</li>
+                        <li><strong>analizar_for():</strong> Procesa bucles for</li>
+                        <li><strong>analizar_asignacion():</strong> Procesa asignaciones</li>
+                    </ul>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">Ejemplo: Árbol Sintáctico</div>
+                    <div class="code-example">
+Programa
+  ├─ Declaración
+  │  ├─ Tipo: int
+  │  ├─ Identificador: x
+  │  ├─ Asignación
+  │  │  ├─ Expresión
+  ├─ Estructura IF
+  │  ├─ Condición
+  │  ├─ Cuerpo
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANALIZADOR SEMÁNTICO -->
+            <div class="tech-card">
+                <h2>🔍 Analizador Semántico</h2>
+                <p><strong>Función:</strong> Verifica significado y reglas del lenguaje</p>
+                
+                <div class="component">
+                    <h3>🛠️ Clase: AnalizadorSemantico</h3>
+                    <ul class="method-list">
+                        <li><strong>analizar():</strong> Realiza todas las verificaciones semánticas</li>
+                        <li><strong>errores:</strong> Lista de errores encontrados</li>
+                        <li><strong>advertencias:</strong> Lista de advertencias</li>
+                    </ul>
+                </div>
+
+                <div class="component">
+                    <h3>✅ Verificaciones Realizadas</h3>
+                    <ul class="method-list">
+                        <li><strong>Variables no declaradas:</strong> Uso de variables sin declarar</li>
+                        <li><strong>División por cero:</strong> Detectar / 0 en tiempo de compilación</li>
+                        <li><strong>Variables no usadas:</strong> Variables declaradas pero no utilizadas</li>
+                        <li><strong>Tipos incompatibles:</strong> Operaciones entre tipos incorrectos</li>
+                        <li><strong>Ámbitos:</strong> Verificar acceso a variables en scope</li>
+                    </ul>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">Ejemplo: Reporte Semántico</div>
+                    <div class="code-example">
+ERRORES:
+  • Error línea 5: Variable 'z' no declarada
+
+ADVERTENCIAS:
+  • Advertencia línea 8: Posible división por cero
+  • Advertencia: Variable 'x' declarada pero no usada
+                    </div>
+                </div>
+            </div>
+
+            <!-- GENERADOR CÓDIGO INTERMEDIO -->
+            <div class="tech-card">
+                <h2>⚡ Generador de Código Intermedio</h2>
+                <p><strong>Función:</strong> Genera código de tres direcciones para optimización</p>
+                
+                <div class="component">
+                    <h3>🛠️ Clase: GeneradorCodigoIntermedio</h3>
+                    <ul class="method-list">
+                        <li><strong>generar():</strong> Convierte tokens a código intermedio</li>
+                        <li><strong>generar_expresion():</strong> Procesa expresiones matemáticas</li>
+                        <li><strong>temp_counter:</strong> Contador para variables temporales</li>
+                        <li><strong>label_counter:</strong> Contador para etiquetas de salto</li>
+                    </ul>
+                </div>
+
+                <div class="component">
+                    <h3>📝 Formato Código 3 Direcciones</h3>
+                    <ul class="method-list">
+                        <li><strong>DECLARE tipo nombre</strong> - Declaraciones</li>
+                        <li><strong>t1 = a + b</strong> - Operaciones aritméticas</li>
+                        <li><strong>IF cond GOTO L1</strong> - Saltos condicionales</li>
+                        <li><strong>GOTO L2</strong> - Saltos incondicionales</li>
+                        <li><strong>L1:</strong> - Etiquetas para saltos</li>
+                    </ul>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">Ejemplo: Código Intermedio</div>
+                    <div class="code-example">
+DECLARE int x
+DECLARE int y
+t1 = 10 + 20
+x = t1
+IF x > 5 GOTO L1
+GOTO L2
+L1:
+t2 = x * 2
+y = t2
+L2:
+                    </div>
+                </div>
+            </div>
+
+            <!-- TRADUCTOR -->
+            <div class="tech-card">
+                <h2>🌐 Traductor</h2>
+                <p><strong>Función:</strong> Convierte código intermedio a lenguajes destino</p>
+                
+                <div class="component">
+                    <h3>🛠️ Clase: Traductor</h3>
+                    <ul class="method-list">
+                        <li><strong>traducir():</strong> Función principal de traducción</li>
+                        <li><strong>traducir_a_python():</strong> Genera código Python</li>
+                        <li><strong>traducir_a_javascript():</strong> Genera código JavaScript</li>
+                        <li><strong>traducir_a_java():</strong> Genera código Java</li>
+                        <li><strong>convertir_tipo():</strong> Adapta tipos entre lenguajes</li>
+                    </ul>
+                </div>
+
+                <div class="component">
+                    <h3>🔄 Conversiones Principales</h3>
+                    <ul class="method-list">
+                        <li><strong>C → Python:</strong> Elimina ;, adapta prints, quita tipos</li>
+                        <li><strong>C → JavaScript:</strong> Agrega let/const, adapta console.log</li>
+                        <li><strong>C → Java:</strong> Agrega class Main, adapta System.out</li>
+                        <li><strong>printf → print/console.log/System.out.println</strong></li>
+                    </ul>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">Ejemplo: Traducción a Python</div>
+                    <div class="code-example">
+// Entrada C-like:
+int x = 10;
+if (x > 5) {
+    printf("Mayor");
+}
+
+// Salida Python:
+x = 10
+if x > 5:
+    print("Mayor")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INTERFAZ GRÁFICA -->
+        <div class="tech-card">
+            <h2>🎨 Interfaz Gráfica (GUI)</h2>
+            
+            <div class="component">
+                <h3>🖼️ Clase: CompiladorGUI</h3>
+                <ul class="method-list">
+                    <li><strong>__init__(root):</strong> Inicializa la ventana principal</li>
+                    <li><strong>crear_interfaz():</strong> Construye todos los componentes</li>
+                    <li><strong>compilar():</strong> Orquesta todo el proceso de compilación</li>
+                    <li><strong>cambiar_tema():</strong> Alterna entre modo oscuro/claro</li>
+                    <li><strong>mostrar_documentacion():</strong> Muestra esta documentación</li>
+                </ul>
+            </div>
+
+            <div class="component">
+                <h3>📊 Componentes de la Interfaz</h3>
+                <ul class="method-list">
+                    <li><strong>Editor de código:</strong> Área de texto con números de línea</li>
+                    <li><strong>Pestañas de resultados:</strong> Tokens, Símbolos, Sintaxis, etc.</li>
+                    <li><strong>Botones de acción:</strong> Compilar, Limpiar, Ejemplo, Documentación</li>
+                    <li><strong>Selector de lenguaje:</strong> Para elegir traducción destino</li>
+                    <li><strong>Tema visual:</strong> Modo oscuro/claro intercambiable</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- FLUJO DE EJECUCIÓN -->
+        <div class="tech-card">
+            <h2>🔄 Flujo de Ejecución Detallado</h2>
+            
+            <div class="flow-chart">
+                <h3>Cuando el usuario hace clic en "COMPILAR":</h3>
+                
+                <div class="flow-step">
+                    <div class="flow-number">1</div>
+                    <div><strong>CompiladorGUI.compilar()</strong> se ejecuta</div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="flow-number">2</div>
+                    <div>Obtiene el código del editor → Crea <strong>AnalizadorLexico</strong></div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="flow-number">3</div>
+                    <div><strong>Lexico.analizar()</strong> genera tokens → Muestra en pestaña "Tokens"</div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="flow-number">4</div>
+                    <div>Crea <strong>TablaSimbolos</strong> → <strong>tabla.construir(tokens)</strong></div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="flow-number">5</div>
+                    <div>Crea <strong>AnalizadorSintactico</strong> → <strong>sintactico.analizar()</strong></div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="flow-number">6</div>
+                    <div>Crea <strong>AnalizadorSemantico</strong> → <strong>semantico.analizar()</strong></div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="flow-number">7</div>
+                    <div>Crea <strong>GeneradorCodigoIntermedio</strong> → <strong>generador.generar()</strong></div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="flow-number">8</div>
+                    <div>Crea <strong>Traductor</strong> → <strong>traductor.traducir()</strong></div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="flow-number">9</div>
+                    <div>Muestra todos los resultados en sus pestañas respectivas</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Smooth scroll para mejor navegación
+        document.addEventListener('DOMContentLoaded', function() {
+            // Efectos de aparición
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.tech-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>
